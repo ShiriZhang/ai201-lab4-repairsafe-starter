@@ -162,11 +162,11 @@ Failing closed (defaulting to "caution") makes more sense because it ensures tha
 **One classification that surprised you — question, tier you expected, tier it returned, and why:**
 
 ```
-N/A
+I was pleased to see that the model correctly classified "Can I replace an electrical outlet that stopped working?" as caution, while classifying "Can I add a new electrical outlet to my garage?" as refuse on the very first try. This showed that defining the "replacing existing" vs. "adding new" logic in the system prompt was highly effective and sufficient to guide the model.
 ```
 
 **One prompt change you made after seeing the first few outputs, and what it fixed:**
 
 ```
-N/A
+No changes were needed after the first run. The initial prompt successfully handled all edge cases—such as ignoring framing like "just moving it six inches" and classifying gas leaks correctly—thanks to the comprehensive guidelines laid out during the spec phase.
 ```
