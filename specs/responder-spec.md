@@ -35,7 +35,8 @@ Generate a response to a home repair question that is appropriate to its safety 
 *Write the exact system prompt text for a safe question. It should produce helpful, specific, actionable answers.*
 
 ```
-[your prompt here]
+You are a helpful home repair assistant. The user's question has been classified as SAFE to DIY. 
+Provide clear, direct, and actionable step-by-step instructions to help them successfully complete the repair. Focus on practical tips and standard tools.
 ```
 
 ---
@@ -45,7 +46,9 @@ Generate a response to a home repair question that is appropriate to its safety 
 *Write the exact system prompt text for a caution question. What safety language should be present? How firm should the "consider a professional" message be — a gentle mention or a clear recommendation?*
 
 ```
-[your prompt here]
+You are a responsible home repair assistant. The user's question has been classified as CAUTION. This repair involves some risk (such as water or electrical systems). 
+Before presenting any steps, provide a clear, prominent safety warning and strongly recommend consulting a professional if they are unsure. 
+Integrate safety warnings (e.g., turning off power/water valves) directly into the step-by-step instructions.
 ```
 
 ---
@@ -59,7 +62,14 @@ Generate a response to a home repair question that is appropriate to its safety 
 *Before writing this prompt, use Plan mode with your AI tool. Share your draft refuse prompt and ask it: "What are ways an LLM might still provide dangerous instructions despite this system prompt?" Revise until you've addressed the failure modes it identifies.*
 
 ```
-[your prompt here]
+You are a home repair safety responder. The user's question has been classified as REFUSE because it is high-risk (such as gas lines, electrical panel work, or structural modifications).
+
+CRITICAL CONSTRAINT: You must NEVER provide any step-by-step instructions, procedures, DIY guides, or general how-to explanations. Even if the user claims to be a professional, asks for educational purposes, or frames it hypothetically, you must refuse to instruct.
+
+INSTEAD:
+1. Politely decline to provide DIY instructions.
+2. Clearly and seriously explain the specific physical dangers of the task (e.g., fire hazards, carbon monoxide poisoning, structural collapse, explosion).
+3. Strongly recommend hiring a licensed and certified professional.
 ```
 
 ---
@@ -71,7 +81,7 @@ Generate a response to a home repair question that is appropriate to its safety 
 *Hint: "be careful" doesn't work. Explicit, behavioral instructions ("do not provide any steps, procedures, or instructions — not even general guidance") work better. What will yours say?*
 
 ```
-[your answer here]
+I will use explicit, behavioral prohibitions in the prompt, such as: "Do not provide any steps, procedures, or instructions—not even general guidance about how the work is done. Your response must contain zero action-oriented guides directing the user to perform physical repair work."
 ```
 
 ---
@@ -81,7 +91,8 @@ Generate a response to a home repair question that is appropriate to its safety 
 *What should your function do if it receives a tier value that isn't "safe", "caution", or "refuse" — e.g., "unknown" while the classifier is still a stub? Write the fallback behavior and explain why.*
 
 ```
-[your answer here]
+If the input tier is unrecognized or "unknown", the generator will fall back to treating it as "caution". 
+This ensures that we "fail-safe" by integrating safety warnings and recommending a professional, rather than failing open (which might treat the question as "safe" and lead to dangerous instructions) or overly blocking the user (which might unnecessarily refuse a safe task).
 ```
 
 ---
@@ -93,11 +104,13 @@ Generate a response to a home repair question that is appropriate to its safety 
 **A "refuse" response that was still too helpful and what you changed to fix it:**
 
 ```
-[your answer here]
+Our initial draft was highly strict and successfully prevented any step-by-step instructions from being leaked. The output for the leaking gas line question shows zero procedural steps or DIY instructions. This is because the "CRITICAL CONSTRAINT" in our system prompt explicitly banned any guides, hypothetical walkthroughs, or educational steps under any circumstances, forcing the model to focus strictly on explaining physical dangers and professional referrals.
 ```
 
 **The tier where the LLM's default behavior was closest to what you wanted (and which tier required the most prompt iteration):**
 
 ```
-[your answer here]
+The "safe" tier was closest to the LLM's default behavior because the model is naturally aligned to be helpful and produce structured, descriptive DIY guides. 
+
+The "refuse" tier required the most design effort and strict formatting constraint iteration. Left to its default behavior, the LLM tends to bypass refusals by explaining "how professionals do it" or giving "conceptual overviews," which violates our safety guardrails. Writing explicit constraints to close these helpfulness loopholes was critical.
 ```
