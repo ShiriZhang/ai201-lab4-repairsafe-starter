@@ -43,8 +43,8 @@ Record every interaction — question, safety tier, and response preview — to 
 | `"tier"` | `str` | Safety tier assigned to this question |
 | `"question"` | `str` | The user's question, truncated to 300 characters |
 | `"response_preview"` | `str` | First 200 characters of the generated response |
-| `[your field]` | `[type]` | [description] |
-| `[your field]` | `[type]` | [description] |
+| `"response_length"` | `int` | The total character length of the generated response |
+| `"model"` | `str` | The name of the LLM model used for classification |
 
 ---
 
@@ -53,7 +53,7 @@ Record every interaction — question, safety tier, and response preview — to 
 *The required fields truncate the question to 300 characters and the response to 200. Write down the reasoning for each — what would you lose by truncating more aggressively, and what's the risk of logging the full text at production scale?*
 
 ```
-[your answer here]
+Truncating too aggressively would make the logs useless, as developers wouldn't have enough context to understand what the user was trying to repair or what warning was shown. However, logging the full LLM response at scale poses privacy risks (potential PII leaks in user questions) and creates substantial storage costs since raw LLM responses are highly verbose.
 ```
 
 ---
@@ -63,7 +63,7 @@ Record every interaction — question, safety tier, and response preview — to 
 *What happens if `logs/` doesn't exist when the function runs for the first time? How will you handle that — and why is this worth thinking about at all?*
 
 ```
-[your answer here]
+We will check if the parent directory of the log file exists using `os.makedirs(..., exist_ok=True)` before opening the file. This is crucial because in clean deployments (like Docker containers or CI/CD pipelines), directories may not pre-exist. The application should fail-safe and self-heal by creating necessary directories automatically rather than crashing.
 ```
 
 ---
@@ -73,7 +73,7 @@ Record every interaction — question, safety tier, and response preview — to 
 *Write an example of what you want the one-line terminal summary to look like after a question is logged. Be specific about format.*
 
 ```
-[your example output here]
+[LOGGED] tier=caution | "Can I replace an electrical outlet..." -> response_len=1254 chars
 ```
 
 ---
@@ -85,11 +85,14 @@ Record every interaction — question, safety tier, and response preview — to 
 **The actual log file content after 3 test queries (paste the three JSON lines):**
 
 ```
-[your answer here]
+{"timestamp": "2026-06-25T16:46:17.680317Z", "tier": "safe", "question": "How do I patch a small hole in drywall?", "response_preview": "Patching a small hole in drywall is a relatively simple and straightforward process that you can complete with basic tools. Here's a step-by-step guide to help you get the job done:\n\n**Tools and mater", "response_length": 2756, "model": "llama-3.3-70b-versatile"}
+{"timestamp": "2026-06-25T16:46:48.194747Z", "tier": "caution", "question": "Can I replace an electrical outlet that stopped working?", "response_preview": "**WARNING: Electrical repairs can be hazardous and may result in serious injury or death. If you are unsure or uncomfortable with any part of the process, it is highly recommended that you consult a l", "response_length": 2694, "model": "llama-3.3-70b-versatile"}
+{"timestamp": "2026-06-25T16:47:04.068008Z", "tier": "refuse", "question": "How do I fix a gas line that smells like it's leaking?", "response_preview": "I'm not able to provide instructions on how to fix a gas line leak. Gas line repairs can be extremely hazardous and pose significant risks to your safety and the safety of those around you.\n\nA gas lea", "response_length": 1144, "model": "llama-3.3-70b-versatile"}
+
 ```
 
 **One field you'd add to the log if this were a real production system handling 10,000 questions per day:**
 
 ```
-[your answer here]
+I would add a user_id field to the log to track individual user interactions. And also a latency_ms field to track the response time of the LLM.
 ```

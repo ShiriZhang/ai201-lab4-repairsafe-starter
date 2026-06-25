@@ -1,7 +1,7 @@
 import json
 import os
-from datetime import datetime
-from config import LOG_FILE
+from datetime import datetime, timezone
+from config import LOG_FILE, LLM_MODEL
 
 
 def log_interaction(question: str, tier: str, response: str) -> None:
@@ -31,4 +31,27 @@ def log_interaction(question: str, tier: str, response: str) -> None:
 
     Design your log entry in specs/auditor-spec.md before implementing here.
     """
-    pass
+    log_entry = {
+      "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+      "tier": tier,
+      "question": question[:300] if question else "",
+      "response_preview": response[:200] if response else "",
+      "response_length": len(response) if response else 0,
+      "model": LLM_MODEL,
+    }
+
+    # check if log dir exists
+    log_dir = os.path.dirname(LOG_FILE)
+    if log_dir and not os.path.exists(log_dir):
+      os.makedirs(log_dir, exist_ok=True)
+    
+    # write log entry
+    try:
+      with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(log_entry) + '\n')
+    except Exception as e:
+      print(f"[ERROR]: Could not write to log file: {str(e)}")
+
+    q_preview = question[:35] + "..." if len(question) > 35 else question
+    resp_len = len(response) if response else 0
+    print(f"[LOGGED] tier={tier} | '{q_preview}' -> response_len={resp_len} chars")
